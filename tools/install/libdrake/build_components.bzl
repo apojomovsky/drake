@@ -95,6 +95,7 @@ LIBDRAKE_COMPONENTS = [
     "//drake/geometry:shape_specification",
     "//drake/lcm:interface",
     "//drake/lcm:lcm",
+    "//drake/lcm:mock",
     "//drake/lcm:lcm_log",
     "//drake/lcm:translator_base",
     "//drake/manipulation/planner:constraint_relaxing_ik",
