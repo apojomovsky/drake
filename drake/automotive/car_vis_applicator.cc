@@ -59,55 +59,34 @@ void CarVisApplicator<T>::AddCarVis(std::unique_ptr<CarVis<T>> vis) {
 template <typename T>
 lcmt_viewer_load_robot CarVisApplicator<T>::get_load_robot_message() const {
   lcmt_viewer_load_robot result;
-  const Eigen::Isometry3d X_WM_W_origin = Eigen::Isometry3d::Identity();
   for (const auto& visualizer : visualizers_) {
     const std::vector<lcmt_viewer_link_data>& vis_elements =
         visualizer.second->GetVisElements();
-        //////////////////////////////////
-        systems::rendering::PoseBundle<T> poses = visualizer.second->CalcPoses(X_WM_W_origin);
-        std::cout << "get_num_poses()" << poses.get_num_poses() << std::endl;
-        //for(int i=0; i < poses.get_num_poses(); i++) {
-        //  std::cout << "pose[" << i << "]: " << poses.get_pose(i) << std::endl;
-        //}
-        //////////////////////////////////
+
+    const Eigen::Isometry3d X_WM_W_origin = Eigen::Isometry3d::Identity();
+    systems::rendering::PoseBundle<T> poses = visualizer.second->CalcPoses(X_WM_W_origin);
     for (const auto& vis_element : vis_elements) {
-      //for(int i=0; i< vis_element.num_geom; i++) {
-      //  std::cout << "type: " << std::to_string(vis_element.geom[i].type) << std::endl;
-      //  std::cout << "position: " << std::to_string(vis_element.geom[i].position[0]) << " "
-      //                            << std::to_string(vis_element.geom[i].position[1]) << " "
-      //                            << std::to_string(vis_element.geom[i].position[2]) << std::endl;
-      //  std::cout << "quaternion: " << std::to_string(vis_element.geom[i].quaternion[0]) << " "
-      //                              << std::to_string(vis_element.geom[i].quaternion[1]) << " "
-      //                              << std::to_string(vis_element.geom[i].quaternion[2]) << " "
-      //                              << std::to_string(vis_element.geom[i].quaternion[3]) << std::endl;
-      //}
-      //std::cout << "----------" << std::endl;
+      auto link_data = vis_element;
+      const int n = poses.get_num_poses();
+      for (int i = 0; i < 4; ++i) {
+        Eigen::Translation<double, 3> t(poses.get_pose(i).translation());
+        //link_data.geom[i].position.resize(3);
+        link_data.geom[i].position[0] = t.x();
+        link_data.geom[i].position[1] = t.y();
+        link_data.geom[i].position[2] = t.z();
 
-      /////////////////////////////////////////////////////////////
-      //const int n = poses.get_num_poses();
-
-      //auto link_data = vis_element;
-      //for (int i = 0; i < n; ++i) {
-      //  Eigen::Translation<double, 3> t(poses.get_pose(i).translation());
-      //  //vis_element.geom[i].position[i].resize(3);
-      //  vis_element.geom[i].position[0] = t.x();
-      //  vis_element.geom[i].position[1] = t.y();
-      //  vis_element.geom[i].position[2] = t.z();
-
-      //  Eigen::Quaternion<double> q(poses.get_pose(i).linear());
-      //  //vis_element.geom[i].quaternion[i].resize(4);
-      //  vis_element.geom[i].quaternion[0] = q.w();
-      //  vis_element.geom[i].quaternion[1] = q.x();
-      //  vis_element.geom[i].quaternion[2] = q.y();
-      //  vis_element.geom[i].quaternion[3] = q.z();
-      //}
-      /////////////////////////////////////////////////////////////
+        Eigen::Quaternion<double> q(poses.get_pose(i).linear());
+        //link_data.geom[i].quaternion.resize(4);
+        link_data.geom[i].quaternion[0] = q.w();
+        link_data.geom[i].quaternion[1] = q.x();
+        link_data.geom[i].quaternion[2] = q.y();
+        link_data.geom[i].quaternion[3] = q.z();
+      }
 
       result.link.push_back(vis_element);
     }
   }
   result.num_links = result.link.size();
-  std::cout << "num_links: " << result.num_links << std::endl;
   return result;
 }
 
