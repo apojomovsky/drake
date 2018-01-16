@@ -71,6 +71,57 @@ lcmt_viewer_load_robot CarVisApplicator<T>::get_load_robot_message() const {
 }
 
 template <typename T>
+lcmt_viewer_draw CarVisApplicator<T>::get_draw_message_in_origin() const {
+
+  lcmt_viewer_draw message;
+
+  for (const auto& visualizer : visualizers_) {
+
+    const std::vector<lcmt_viewer_link_data>& vis_elements =
+        visualizer.second->GetVisElements();
+
+    const Eigen::Isometry3d X_WM_W_origin = Eigen::Isometry3d::Identity();
+
+    systems::rendering::PoseBundle<T> poses = visualizer.second->CalcPoses(X_WM_W_origin);
+
+
+    //const int n = visualization_poses.get_num_poses();
+    const int n = vis_elements.size();
+
+    message.timestamp = 0;
+    message.num_links = n;
+    message.link_name.resize(n);
+    message.robot_num.resize(n);
+    message.position.resize(n);
+    message.quaternion.resize(n);
+
+    for (int i = 0; i < n; ++i) {
+      message.robot_num[i] = poses.get_model_instance_id(i);
+
+      message.link_name[i] = poses.get_name(i);
+
+      Eigen::Translation<double, 3> t(poses.get_pose(i).translation());
+      message.position[i].resize(3);
+      message.position[i][0] = t.x();
+      message.position[i][1] = t.y();
+      message.position[i][2] = t.z();
+
+      Eigen::Quaternion<double> q(poses.get_pose(i).linear());
+      message.quaternion[i].resize(4);
+      message.quaternion[i][0] = q.w();
+      message.quaternion[i][1] = q.x();
+      message.quaternion[i][2] = q.y();
+      message.quaternion[i][3] = q.z();
+    }
+
+    break;
+  }
+
+  return message;
+
+}
+
+template <typename T>
 void CarVisApplicator<T>::CalcPoseBundleOutput(
     const systems::Context<T>& context,
     PoseBundle<T>* visualization_poses) const {

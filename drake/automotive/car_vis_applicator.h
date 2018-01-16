@@ -6,6 +6,7 @@
 #include "drake/automotive/car_vis.h"
 #include "drake/common/drake_copyable.h"
 #include "drake/lcmt_viewer_load_robot.hpp"
+#include "drake/lcmt_viewer_draw.hpp"
 #include "drake/systems/framework/leaf_system.h"
 #include "drake/systems/rendering/pose_bundle.h"
 #include "drake/systems/rendering/pose_vector.h"
@@ -65,6 +66,8 @@ class CarVisApplicator : public systems::LeafSystem<T> {
   /// Returns an lcmt_viewer_load_robot message containing the geometries of the
   /// bodies being visualized.
   lcmt_viewer_load_robot get_load_robot_message() const;
+
+  lcmt_viewer_draw get_draw_message_in_origin() const;
 
   /// Returns the number vehicles being visualized.
   int num_cars() const { return static_cast<int>(visualizers_.size()); }
